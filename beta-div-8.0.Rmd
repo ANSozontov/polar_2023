@@ -9,6 +9,54 @@ output:
     code_folding: hide
 ---
 
+
+# 0. License --------------------------------------------------------------
+#
+# ʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘ
+#                          Artëm Sozontov ©
+# ʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘ
+# _________________________________________________________________________
+# This code is stored on the GitHub repository 
+# URL: https://github.com/ANSozontov/Betadiv_2020
+# and has a CC BY SA 4.0 licence 
+# URL: https://creativecommons.org/licenses/by-sa/4.0/ 
+# 
+#                         What does it mean? 
+# 
+# You are free to use, transform and distribute this code or its parts, 
+# including commercial purposes. Just keep in mind only two restrictions: 
+# `BY`: You are obligated to cite the article where authorship was claimed:
+#     Mukhacheva S.V., Sozontov A.N. Long-term Dynamics of Small Mammal 
+#     Communities in the Period of Reduction of Copper Smelter Emissions: 2. 
+#     β-Diversity // Russian Journal of Ecology. 2021. Vol. 52. № 6. P. 533–542.
+# `SA`: You are obligated to publish and distribute you derivate code 
+#     under the license not stricter than the current one (CC-BY-SA). 
+# _________________________________________________________________________
+
+# ʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘ
+#                          Артём Созонтов ©
+# ʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘʘ
+# _________________________________________________________________________
+# Код размещен на репозитории GitHub 
+# URL: https://github.com/ANSozontov/Betadiv_2020
+# и распространяется под лицензией CC BY SA 4.0 
+# URL: https://creativecommons.org/licenses/by-sa/4.0/ 
+# 
+#                         Что это означает? 
+# 
+# Вы можете свободно использовать, модифицировать и распространять этот код
+# (включая коммерческое использование), учитывая лишь два ограничения:
+# `BY`: Используя данный скрипт или его фрагменты вы обязаны процитировать 
+#     статью, где было заявлено авторство: Мухачева С.В., Созонтов А.Н. 
+#     Многолетняя динамика сообществ мелких млекопитающих в период снижения
+#     выбросов медеплавильного завода. II. Бета-разнообразие // Экология. 2021.
+#     № 6. с. 470–480.
+# `SA`: Вы обязаны публиковать и распространять свой собственный код, 
+#     производный от данного, под лицензией не строже чем текущая - СС-BY-SA
+# _________________________________________________________________________
+
+
+
 # Загрузка данных
 
 ```{r setup, message = FALSE, warning = FALSE}
