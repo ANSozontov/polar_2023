@@ -100,7 +100,7 @@ abu[c("x", "seasonal", "trend", "random")] %>%
 		 panel.grid.minor.y = element_blank(), 
 		 panel.grid.major.x = element_blank()) +
 	labs(x = "Sampling hours", y = "Abundance/activity and its components")
-ggsave("total_abundance.svg", width = 7, height = 4)
+# ggsave("total_abundance.svg", width = 7, height = 4)
 
 per2(abu$x, 1/6)
 
@@ -118,7 +118,7 @@ data.frame(x = rep(1:6, 4), y = as.numeric(abu$x)) %>%
 		labels = c("04", "08", "12", "16", "20","24")) + 
     scale_fill_manual(values = colorRampPalette(c("darkgrey", "orange"))
                       (6)[c(2, 4, 6, 5, 3, 1)])
-ggsave("Abundance_cycle.svg")
+# ggsave("Abundance_cycle.svg")
 
 # H#1 by taxa -------------------------------------------------------------
 by_taxa <- df %>% 
@@ -172,19 +172,17 @@ ggsave("taxa_abundance.svg", width = 7, height = 4.5)
 
 # dominant species  -------------------------------------------------------
 dom_sp <- df %>%
-	filter(taxa %in% c("Erigone psychrophila", "Masikia indistincta",
+	filter(taxa %in% c("Masikia indistincta",
 		"Brachystomella parvula (Schäffer, 1896)", 
 		"Isotomurus chaos Potapov et Babenko, 2011",
-		"Isotomurus stuxbergi (Tullberg, 1876)", 
 		"Pachyotoma crassicauda (Tullberg, 1871)")) %>% 
-    filter(taxa != "Isotomurus stuxbergi (Tullberg, 1876)", 
-           taxa != "Erigone psychrophila") %>% 
-	separate(taxa, c("gen", "sp"), " ", extra = "drop") %>% 
+    separate(taxa, c("gen", "sp"), " ", extra = "drop") %>% 
 	unite(taxa, gen, sp, sep = " ") %>% 
 	split(.$taxa) %>% 
 	map(~.x %>% 
 	    	group_by(D, H) %>% 
 	    	summarise(abu = sum(abu, na.rm = TRUE), .groups = "drop") %>% 
+	        # mutate(abu = abu/max(abu)) %>% 
 	    	pull(abu) %>% 
 	    	ts(frequency = 6) %>% 
 	    	decompose()
@@ -202,9 +200,13 @@ dom_sp %>%
 	cbind(x = a$x, trend = a$trend, 
 		 seasonal = a$seasonal, random = a$random) %>% 
 		as_tibble %>% 
-		mutate_all(function(b){b/max(b, na.rm = TRUE)}) %>% 
+		# mutate_all(function(b){b/max(b, na.rm = TRUE)}) %>% 
+	    mutate(random = random/max(x), 
+	           seasonal = seasonal/max(x), 
+	           trend = trend/max(x), 
+	           x = x/max(x)) %>% 
 		rownames_to_column("id") %>% 
-		mutate(id = as.numeric(id))}) %>%  
+		mutate(id = as.numeric(id))}) %>% 
 	map_df(rbind, .id = "taxa") %>% 
 	rename(observed = x, periodic = seasonal) %>% 
 	pivot_longer(names_to = "component", values_to = "val", -1:-2) %>% 
@@ -224,22 +226,8 @@ dom_sp %>%
 		 panel.grid.major.x = element_blank(), 
 		 legend.text = element_text(face = "italic"),
 		 legend.position = "bottom") +
-	labs(x = "Sampling hours", y = "Abundance and its components", 
-		subtitle = "all variables are normalized to max = 1")
-
-# I.stuxbergi
-I.stuxbergi <- dom_sp %>% 
-	pluck("Isotomurus stuxbergi", "x") %>% 
-	as.numeric()
-
-per2(I.stuxbergi, 1/2)
-per2(I.stuxbergi, 1/3)
-per2(I.stuxbergi, 1/4)
-per2(I.stuxbergi, 1/5)
-per2(I.stuxbergi, 1/6)
-per2(I.stuxbergi, 1/7)
-per2(I.stuxbergi, 1/8)
-per2(I.stuxbergi, 1/9)
+	labs(x = "Sampling hours", y = "Abundance/activity and its components", 
+		subtitle = "Note: all variables are normalized to max=1")
 
 # predictors multicoll & periodicity ----------------------------------------------------
 
