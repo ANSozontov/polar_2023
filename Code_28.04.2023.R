@@ -54,7 +54,7 @@ factors <- readxl::read_excel("Data_28.04.2023.xlsx",
 		  log_lux = log10(lux), .after = 2)
 factors <- left_join(factors, loggers, by = c("D", "H")) 
 
-suppressMessages(suppressWarnings(
+suppressWarnings(suppressMessages(
 df <- readxl::read_excel("Data_28.04.2023.xlsx", 
 			    sheet = "animals", skip = 3)
 ))
@@ -99,13 +99,13 @@ abu[c("x", "seasonal", "trend", "random")] %>%
 		 panel.grid.minor = element_blank(), 
 		 panel.grid.minor.y = element_blank(), 
 		 panel.grid.major.x = element_blank()) +
-	labs(x = "Sampling hours", y = "Abundance and its components")
-ggsave("total_abundance.svg")
+	labs(x = "Sampling hours", y = "Abundance/activity and its components")
+ggsave("total_abundance.svg", width = 7, height = 4)
 
 per2(abu$x, 1/6)
 
-# соотношение сигнал/шум > 4
-# Н0 о непериодичности активности отклонена на уровне p<0.001
+# Signal to noise ratio is  > 4
+# Н0 about non-periodicity is rejected with p<0.001 significance level
 
 data.frame(x = rep(1:6, 4), y = as.numeric(abu$x)) %>% 
 	mutate(x = factor(x)) %>% 
@@ -113,9 +113,12 @@ data.frame(x = rep(1:6, 4), y = as.numeric(abu$x)) %>%
 	geom_boxplot() + 
 	theme_bw() + 
 	theme(legend.position = "none") + 
-	labs(x = NULL, y = "Abundance/Activity") + 
+	labs(x = "Sampling hour", y = "Abundance/Activity") + 
 	scale_x_discrete(breaks = 1:6, 
-		labels = c("04", "08", "12", "16", "20","24"))
+		labels = c("04", "08", "12", "16", "20","24")) + 
+    scale_fill_manual(values = colorRampPalette(c("darkgrey", "orange"))
+                      (6)[c(2, 4, 6, 5, 3, 1)])
+ggsave("Abundance_cycle.svg")
 
 # H#1 by taxa -------------------------------------------------------------
 by_taxa <- df %>% 
@@ -136,8 +139,10 @@ by_taxa %>%
 		per2(a, 1/6)
 	})
 
-by_taxa %>% lapply(function(a){
-		cbind(x = a$x, trend = a$trend, 
+by_taxa %>% 
+    lapply(function(a){
+		cbind(
+		    x = a$x, trend = a$trend, 
 			seasonal = a$seasonal, random = a$random) %>% 
 		as_tibble %>% 
 		mutate_all(function(b){b/max(b, na.rm = TRUE)}) %>% 
@@ -149,7 +154,6 @@ by_taxa %>% lapply(function(a){
 	mutate(component = factor(component,
 		levels = c("observed","trend", "periodic", "random"))) %>% 
 	ggplot(aes(x = id, y = val, color = taxa)) +
-	# geom_vline(xintercept = (1:4)*6-3) +
 	geom_vline(xintercept = (1:4)*6-3, color = "red", linetype = "dotted") +
 	geom_vline(xintercept = (1:4)*6, color = "blue", linetype = "dotted") +
 	geom_line() + 
@@ -162,8 +166,9 @@ by_taxa %>% lapply(function(a){
 		 panel.grid.minor.y = element_blank(), 
 		 panel.grid.major.x = element_blank(), 
 		 legend.position = "bottom") +
-	labs(x = "Sampling hours", y = "Abundance and its components", 
+	labs(x = "Sampling hours", y = "Abundance/activity and its components", 
 		subtitle = "all variables are normalized to max = 1")
+ggsave("taxa_abundance.svg", width = 7, height = 4.5)
 
 # dominant species  -------------------------------------------------------
 dom_sp <- df %>%
@@ -172,6 +177,8 @@ dom_sp <- df %>%
 		"Isotomurus chaos Potapov et Babenko, 2011",
 		"Isotomurus stuxbergi (Tullberg, 1876)", 
 		"Pachyotoma crassicauda (Tullberg, 1871)")) %>% 
+    filter(taxa != "Isotomurus stuxbergi (Tullberg, 1876)", 
+           taxa != "Erigone psychrophila") %>% 
 	separate(taxa, c("gen", "sp"), " ", extra = "drop") %>% 
 	unite(taxa, gen, sp, sep = " ") %>% 
 	split(.$taxa) %>% 
