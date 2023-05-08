@@ -228,20 +228,20 @@ dom_sp %>%
 	labs(x = "Sampling hours", y = "Abundance/activity and its components", 
 		subtitle = "Note: all variables are normalized to max=1")
 
-# predictors multicoll & periodicity ----------------------------------------------------
-df.forgam <- df %>% 
-	filter(taxatype == "general") %>% 
-	group_by(D, H) %>% 
-	summarise(abu = sum(abu), .groups = "drop") %>% 
-	left_join(factors, by = c("D", "H")) %>% 
-	mutate(decompress(abu), decompress(lux), decompress(log_lux))
+# predictors multicoll ---------------------------------------------------
+# df.forgam <- df %>% 
+# 	filter(taxatype == "general") %>% 
+# 	group_by(D, H) %>% 
+# 	summarise(abu = sum(abu), .groups = "drop") %>% 
+# 	left_join(factors, by = c("D", "H")) %>% 
+# 	mutate(decompress(abu), decompress(lux), decompress(log_lux))
 
 factors[,-1:-2] %>% 
 	cor(method = "spearman") %>% 
 	round(2)
 
-cor.val <- cor(factors[,-1:-3], method = "spearman")
-cor.pval <- expand_grid(v1 = 4:10, v2 = 4:10) %>% 
+cor.val1 <- cor(factors[,-1:-3], method = "spearman")
+cor.pval1 <- expand_grid(v1 = 4:10, v2 = 4:10) %>% 
 	split(1:nrow(.)) %>% 
 	lapply(function(a){
 		p = cor.test(as_vector(factors[,a$v1]), as_vector(factors[,a$v2]), 
@@ -259,8 +259,8 @@ cor.pval <- expand_grid(v1 = 4:10, v2 = 4:10) %>%
 
 svg("multicollin.svg")
 corrplot::corrplot(
-	corr = cor.val, 
-	p.mat = cor.pval, 
+	corr = cor.val1, 
+	p.mat = cor.pval1, 
 	type="upper", 
 	order = "original",
 	diag = FALSE,
@@ -268,18 +268,33 @@ corrplot::corrplot(
 	sig.level = 0.05)
 dev.off() 
 
+
+# correlations ------------------------------------------------------------
+
 df.forcor <- df %>% 
-	filter(taxatype == "general", taxa %in% c("Collembola", "Aranei", "Acari", "Diptera")) %>% 
+	filter(taxa %in% c("Collembola", "Aranei", "Acari", "Diptera")) %>% 
 	group_by(D, H, taxa) %>% 
 	summarise(abu = sum(abu), .groups = "drop") %>% 
 	pivot_wider(names_from = taxa, values_from = abu) %>% 
-	left_join(df.forgam, by = c("D", "H")) %>% 
-	select(All = abu, Collembola, Acari, Aranei, Diptera, 
-		  lux, wind_20cm, temp_0cm, hum_rel)
+    mutate(All = abu$x, .after = 2) 
+df.forcor <- df %>%
+    filter(taxa %in% c("Masikia indistincta",
+                       "Brachystomella parvula (Schäffer, 1896)", 
+                       "Isotomurus chaos Potapov et Babenko, 2011",
+                       "Pachyotoma crassicauda (Tullberg, 1871)")) %>% 
+    separate(taxa, c("gen", "sp"), " ", extra = "drop") %>% 
+    mutate(gen = paste0(substr(gen, 1, 1), ".")) %>% 
+    unite(taxa, gen, sp, sep = " ") %>% 
+    group_by(D, H, taxa) %>% 
+    summarise(abu = sum(abu), .groups = "drop") %>% 
+    pivot_wider(names_from = taxa, values_from = abu) %>% 
+    left_join(df.forcor, ., by = c("D", "H")) %>% 
+    left_join(factors, by = c("D", "H")) %>% 
+	select(-wind_2m, -temp_2m, -hum_rel, -log_lux)
 
-cor.val <- cor(df.forcor[,1:5], df.forcor[,6:9], 
+cor.val2 <- cor(df.forcor[,12:15], df.forcor[,3:11], 
 	method = "spearman")
-cor.pval <- expand_grid(v1 = 1:5, v2 = 6:9) %>% 
+cor.pval2 <- expand_grid(v1 = 12:15, v2 = 3:11) %>% 
 	split(1:nrow(.)) %>% 
 	lapply(function(a){
 		p = cor.test(as_vector(df.forcor[,a$v1]), as_vector(df.forcor[,a$v2]), 
@@ -295,94 +310,23 @@ cor.pval <- expand_grid(v1 = 1:5, v2 = 6:9) %>%
 	column_to_rownames("v1") %>% 
 	as.matrix()
 
-svg("orders_and_factors.svg")
+pdf("orders_and_factors.pdf")
 corrplot::corrplot(
-	corr = cor.val, 
-	p.mat = cor.pval, 
+	corr = cbind(cbind(All = cor.val2[,1]), 
+	             rep(NA, nrow(cor.val2)), 
+	             cor.val2[,2:5], 
+	             rep(NA, nrow(cor.val2)), 
+	             cor.val2[,6:9]),
+	p.mat = cbind(cbind(All = cor.pval2[,1]), 
+	              rep(NA, nrow(cor.val2)), 
+	              cor.pval2[,2:5], 
+	              rep(NA, nrow(cor.val2)), 
+	              cor.pval2[,6:9]), 
 	type="full", 
 	order = "original",
+	na.label = " ",
 	diag = TRUE,
 	is.corr=FALSE,
 	col =  corrplot::COL2('RdYlBu', 10)[10:1], 
 	sig.level = 0.05)
 dev.off()
-
-
-df.mass <- df %>% 
-	filter(taxa %in% c("Erigone psychrophila", "Masikia indistincta",
-				    "Brachystomella parvula (Schäffer, 1896)", 
-				    "Isotomurus chaos Potapov et Babenko, 2011",
-				    "Isotomurus stuxbergi (Tullberg, 1876)", 
-				    "Pachyotoma crassicauda (Tullberg, 1871)")) %>% 
-	separate(taxa, c("gen", "sp"), " ", extra = "drop") %>% 
-	unite(taxa, gen, sp, sep = " ") %>% 
-	group_by(D, H, taxa) %>% 
-	summarise(abu = sum(abu), .groups = "drop") %>% 
-	pivot_wider(names_from = taxa, values_from = abu) %>% 
-	left_join(df.forgam, by = c("D", "H")) %>% 
-	select(3:8, lux, wind_20cm, temp_20cm, hum_rel)
-
-cor.val <- cor(df.mass[,1:6], df.mass[,7:10], 
-			method = "spearman")
-cor.pval <- expand_grid(v1 = 1:6, v2 = 7:10) %>% 
-	split(1:nrow(.)) %>% 
-	lapply(function(a){
-		p = cor.test(as_vector(df.mass[,a$v1]), as_vector(df.mass[,a$v2]), 
-				   method = "spearman")
-		data.frame(p = p$p.value, 
-				 # est = p$estimate,
-				 v1 = colnames(df.mass[a$v1]),
-				 v2 = colnames(df.mass[,a$v2]))
-	}) %>% 
-	map_df(tibble) %>% 
-	mutate(p = p.adjust(p, method = "BY")) %>% 
-	pivot_wider(names_from = v2, values_from = p) %>% 
-	column_to_rownames("v1") %>% 
-	as.matrix()
-
-svg("dominants_and_factors.svg")
-corrplot::corrplot(
-	corr = cor.val, 
-	p.mat = cor.pval, 
-	type="full", 
-	order = "original",
-	diag = TRUE,
-	is.corr=FALSE,
-	col =  corrplot::COL2('RdYlBu', 10)[10:1], 
-	sig.level = 0.05)
-dev.off()
-
-# models ------------------------------------------------------------------
-library(mgcv)
-
-
-# DF <- abu[1:4] %>% 
-# 	as.data.frame() %>% 
-# 	rename_with(~ paste0("abu_", .x)) %>% 
-# 	cbind(DF, .)
-	
-
-
-mgcv::gam(abu ~ log_lux + hum_rel, data = DF) %>% ft
-mgcv::gam(abu ~ s(log_lux) + hum_rel, data = DF) %>% ft
-mgcv::gam(abu ~ s(log_lux) + s(hum_rel), data = DF) %>% ft
-mgcv::gam(abu ~ log_lux + hum_rel + wind_20cm, data = DF) %>% ft
-mgcv::gam(abu ~ log_lux + hum_rel + s(D, bs = 're') , data = DF) %>% ft
-mgcv::gam(abu ~ s(log_lux) + hum_rel + s(D, bs = 're') , data = DF) %>% ft
-mgcv::gam(abu ~ s(lux)     + hum_rel + s(D, bs = 're') , data = DF) %>% ft
-mgcv::gam(abu_seasonal ~ lux_seasonal     + hum_rel + s(D, bs = 're') , data = DF) %>% ft
-
-
-mgcv::gam(abu_random ~ lux + hum_rel , data = DF) %>% ft
-mgcv::gam(abu_random ~ hum_rel , data = DF) %>% ft
-mgcv::gam(abu_random ~ lux + hum_rel , data = DF) %>% ft
-
-
-fit <- mgcv::gam(abu ~ s(lux, k = 10)     + hum_rel + s(D,  bs = 're') , data = DF) 
-mgcv::gam.check(fit)
-
-
-
-fit3 <- lm(abu ~ lux_raw + temp_20cm + hum_abs, data = DF)
-summary(fit3)
-AIC(fit3)
