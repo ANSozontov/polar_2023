@@ -62,9 +62,9 @@ df <- readxl::read_excel("Data_28.04.2023.xlsx",
 df <- df %>% 
 	mutate_all(as.character) %>% 
 	pivot_longer(names_to = "dt", values_to = "abu", -1:-2) %>% 
-	separate(dt, sep = "_", into = c("D", "h")) %>% 
+	separate(dt, sep = "_", into = c("trap_id", "D", "h")) %>% 
 	separate(h , sep = "\\:", into = "H", extra = "drop") %>% 
-	mutate_at(c("D", "H", "abu"), as.numeric) #%>% filter(abu > 0)
+	mutate_at(c("trap_id", "D", "H", "abu"), as.numeric)
 
 # H1: is total activity periodic? -------------------------------------------------------
 
@@ -118,6 +118,85 @@ data.frame(x = rep(1:6, 4), y = as.numeric(abu$x)) %>%
     scale_fill_manual(values = colorRampPalette(c("darkgrey", "orange"))
                       (6)[c(2, 4, 6, 5, 3, 1)])
 # ggsave("Fig. B. Abundance_cycle.pdf", width = 3.5, height = 2)
+
+for_boxplots <- df %>% 
+    filter(taxatype == "general") %>% 
+    group_by(trap_id, D, H) %>% 
+    summarise(abu = sum(abu), .groups = "drop") %>% 
+    mutate(taxa = "All_taxa", .before = 1) %>% 
+    rbind(select(df, -taxatype)) %>% 
+    filter(taxa %in%  c("All_taxa", "Collembola", "Aranei", "Acari", "Diptera", 
+        "Masikia indistincta","Brachystomella parvula (Schäffer, 1896)", 
+        "Isotomurus chaos Potapov et Babenko, 2011", 
+        "Pachyotoma crassicauda (Tullberg, 1871)")) %>% 
+    separate(taxa, c("gen", "sp"), " ", extra = "drop") %>%
+    mutate(taxa = case_when(is.na(sp) ~ gen, TRUE ~ paste0(gen, " ", sp)),
+           taxa = fct_inorder(taxa, ordered = TRUE), 
+           H2 = factor(H),
+           H,
+           .before = 1,
+           .keep = "unused")
+
+for_boxplots %>% 
+    filter(taxa == "All_taxa") %>% 
+    group_by(H) %>% 
+    mutate(mean_abu = mean(abu)) %>% 
+    ungroup() %>% 
+    ggplot() + 
+    geom_boxplot(aes(x = H, y = abu, group = H2, fill = H2)) +
+    geom_line(aes(x = H, y = mean_abu), color = "blue") + 
+    geom_point(aes(x = H, y = mean_abu), shape = 15, color = "blue") +
+    theme(legend.position = "none") + 
+    labs(x = "Sampling hour", y = "Abundance/Activity", 
+         subtitle = "All taxa") +
+    scale_x_continuous(breaks = 1:6*4,
+                       labels = c("04", "08", "12", "16", "20","24")) +
+    scale_fill_manual(values = colorRampPalette(c("darkgrey", "orange"))
+                      (6)[c(2, 4, 6, 5, 3, 1)])
+ggsave("activity by hours - all taxa together.svg", height = 3, width = 3)
+
+for_boxplots %>% 
+    filter(taxa %in% c("Collembola", "Aranei", "Acari", "Diptera")) %>% 
+    group_by(taxa, H, H2) %>% 
+    mutate(mean_abu = mean(abu)) %>% 
+    ungroup() %>% 
+    ggplot() + 
+    geom_boxplot(aes(x = H, y = abu, group = H2, fill = H2)) +
+    geom_line(aes(x = H, y = mean_abu), color = "blue") +
+    geom_point(aes(x = H, y = mean_abu), shape = 15, color = "blue") +
+    theme(legend.position = "none") + 
+    labs(x = "Sampling hour", y = "Abundance/Activity", 
+         subtitle = "By orders") +
+    scale_x_continuous(breaks = 1:6*4,
+                      labels = c("04", "08", "12", "16", "20","24")) +
+    scale_fill_manual(values = colorRampPalette(c("darkgrey", "orange"))
+                      (6)[c(2, 4, 6, 5, 3, 1)]) + 
+    facet_wrap(~taxa, scales = "free_y")
+ggsave("activity by hours - by orders.svg", height = 6, width = 6)
+
+for_boxplots %>% 
+    filter(taxa %in% c("Masikia indistincta",
+                       "Brachystomella parvula", 
+                       "Isotomurus chaos",
+                       "Pachyotoma crassicauda")) %>% 
+    group_by(taxa, H, H2) %>% 
+    mutate(mean_abu = mean(abu)) %>% 
+    ungroup() %>% 
+    ggplot() + 
+    geom_boxplot(aes(x = H, y = abu, group = H2, fill = H2)) +
+    geom_line(aes(x = H, y = mean_abu), color = "blue") +
+    geom_point(aes(x = H, y = mean_abu), shape = 15, color = "blue") +
+    theme(legend.position = "none") + 
+    labs(x = "Sampling hour", y = "Abundance/Activity", 
+         subtitle = "By dominant species") +
+    scale_x_continuous(breaks = 1:6*4,
+                       labels = c("04", "08", "12", "16", "20","24")) +
+    scale_fill_manual(values = colorRampPalette(c("darkgrey", "orange"))
+                      (6)[c(2, 4, 6, 5, 3, 1)]) + 
+    facet_wrap(~taxa, scales = "free_y") + 
+    theme(strip.text = element_text(face = "italic"))
+ggsave("activity by hours - by dominant species.svg", height = 6, width = 6)
+
 
 # H#1 by taxa -------------------------------------------------------------
 by_taxa <- df %>% 
