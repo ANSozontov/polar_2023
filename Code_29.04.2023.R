@@ -100,7 +100,7 @@ abu[c("x", "seasonal", "trend", "random")] %>%
 		 panel.grid.minor.y = element_blank(), 
 		 panel.grid.major.x = element_blank()) +
 	labs(x = "Sampling hours", y = "Abundance/activity and its components")
-# ggsave("total_abundance.svg", width = 7, height = 4)
+# ggsave("Fig. A. total_abundance.pdf", width = 7, height = 4)
 
 per2(abu$x, 1/6)
 
@@ -117,7 +117,7 @@ data.frame(x = rep(1:6, 4), y = as.numeric(abu$x)) %>%
 		labels = c("04", "08", "12", "16", "20","24")) + 
     scale_fill_manual(values = colorRampPalette(c("darkgrey", "orange"))
                       (6)[c(2, 4, 6, 5, 3, 1)])
-# ggsave("Abundance_cycle.svg")
+# ggsave("Fig. B. Abundance_cycle.pdf", width = 3.5, height = 2)
 
 # H#1 by taxa -------------------------------------------------------------
 by_taxa <- df %>% 
@@ -167,7 +167,7 @@ by_taxa %>%
 		 legend.position = "bottom") +
 	labs(x = "Sampling hours", y = "Abundance/activity and its components", 
 		subtitle = "all variables are normalized to max = 1")
-ggsave("taxa_abundance.svg", width = 7, height = 4.5)
+ggsave("Fig.C. taxa_abundance.pdf", width = 7, height = 4.5)
 
 # dominant species  -------------------------------------------------------
 dom_sp <- df %>%
@@ -227,14 +227,8 @@ dom_sp %>%
 		 legend.position = "bottom") +
 	labs(x = "Sampling hours", y = "Abundance/activity and its components", 
 		subtitle = "Note: all variables are normalized to max=1")
-
+ggsave("Fig.D. dom.spec.pdf", width = 7, height = 4.5)
 # predictors multicoll ---------------------------------------------------
-# df.forgam <- df %>% 
-# 	filter(taxatype == "general") %>% 
-# 	group_by(D, H) %>% 
-# 	summarise(abu = sum(abu), .groups = "drop") %>% 
-# 	left_join(factors, by = c("D", "H")) %>% 
-# 	mutate(decompress(abu), decompress(lux), decompress(log_lux))
 
 factors[,-1:-2] %>% 
 	cor(method = "spearman") %>% 
@@ -257,7 +251,7 @@ cor.pval1 <- expand_grid(v1 = 4:10, v2 = 4:10) %>%
 	as.matrix()
 
 
-svg("multicollin.svg")
+pdf("Fig. E. Factor_multicollin.pdf", width = 4, height = 4)
 corrplot::corrplot(
 	corr = cor.val1, 
 	p.mat = cor.pval1, 
@@ -310,7 +304,7 @@ cor.pval2 <- expand_grid(v1 = 12:15, v2 = 3:11) %>%
 	column_to_rownames("v1") %>% 
 	as.matrix()
 
-pdf("orders_and_factors.pdf")
+pdf("Fig. F. Orders_and_factors.pdf", height = 4)
 corrplot::corrplot(
 	corr = cbind(cbind(All = cor.val2[,1]), 
 	             rep(NA, nrow(cor.val2)), 
