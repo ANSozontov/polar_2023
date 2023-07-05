@@ -252,6 +252,7 @@ ggsave("Fig.C. taxa_abundance.pdf", width = 7, height = 4.5)
 dom_sp <- df %>%
 	filter(taxa %in% c("Masikia indistincta",
 		"Brachystomella parvula (Schäffer, 1896)", 
+		"Isotomurus stuxbergi (Tullberg, 1876)", # check
 		"Isotomurus chaos Potapov et Babenko, 2011",
 		"Pachyotoma crassicauda (Tullberg, 1871)")) %>% 
     separate(taxa, c("gen", "sp"), " ", extra = "drop") %>% 
