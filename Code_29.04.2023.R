@@ -253,6 +253,7 @@ dom_sp <- df %>%
 	filter(taxa %in% c("Masikia indistincta",
 		"Brachystomella parvula (Schäffer, 1896)", 
 		"Isotomurus stuxbergi (Tullberg, 1876)", # check
+		"Erigone psychrophila", # check
 		"Isotomurus chaos Potapov et Babenko, 2011",
 		"Pachyotoma crassicauda (Tullberg, 1871)")) %>% 
     separate(taxa, c("gen", "sp"), " ", extra = "drop") %>% 
@@ -290,15 +291,22 @@ dom_sp %>%
 	rename(observed = x, periodic = seasonal) %>% 
 	pivot_longer(names_to = "component", values_to = "val", -1:-2) %>% 
 	mutate(component = factor(component,
-						 levels = c("observed","trend", "periodic", "random"))) %>% 
-	ggplot(aes(x = id, y = val, color = taxa)) +
+						 levels = c("observed","trend", "periodic", "random")), 
+            periodicity = case_when(taxa %in% c("Isotomurus stuxbergi", "Erigone psychrophila") ~ "no", 
+                             TRUE ~ "yes"),
+            taxa = factor(taxa, levels = c("Isotomurus stuxbergi", 
+                "Brachystomella parvula", "Isotomurus chaos",
+                "Masikia indistincta", "Pachyotoma crassicauda", 
+                "Erigone psychrophila"))) %>% 
+	ggplot(aes(x = id, y = val, color = taxa, shape = periodicity)) +
 	geom_vline(xintercept = (1:4)*6-3, color = "red", linetype = "dotted") +
 	geom_vline(xintercept = (1:4)*6, color = "blue", linetype = "dotted") +
 	geom_line() + 
-	geom_point(shape = 21, fill = "white") +
+	geom_point(fill = "white") +
 	theme_bw() +
 	facet_grid(rows = vars(component), scales = "free") + 
 	scale_x_continuous(breaks = 1:24, labels = rep(1:6*4, 4)) + 
+    scale_shape_manual(values = c(20, 21)) +
 	theme(axis.text.x = element_text(angle = 0), 
 		 panel.grid.minor = element_blank(), 
 		 panel.grid.minor.y = element_blank(), 
@@ -307,7 +315,7 @@ dom_sp %>%
 		 legend.position = "bottom") +
 	labs(x = "Sampling hours", y = "Abundance/activity and its components", 
 		subtitle = "Note: all variables are normalized to max=1")
-ggsave("Fig.D. dom.spec.pdf", width = 7, height = 4.5)
+ggsave("Fig.7. dom.spec.pdf", width = 297, height = 210, units ="mm")
 # predictors multicoll ---------------------------------------------------
 
 factors[,-1:-2] %>% 
