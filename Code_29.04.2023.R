@@ -338,8 +338,15 @@ cor.pval1 <- expand_grid(v1 = 4:10, v2 = 4:10) %>%
 	column_to_rownames("v1") %>% 
 	as.matrix()
 
+colnames(cor.pval1) <- 
+    rownames(cor.pval1) <- 
+    colnames(cor.val1) <- 
+    rownames(cor.val1) <- c(
+        "light level", "wind_20cm", "wind_2m", "temperature_0cm", 
+        "temperature_2m", "humidity_relative", "humidity_absolute"
+    )
 
-pdf("Fig. E. Factor_multicollin.pdf", width = 4, height = 4)
+pdf("Fig. 7. Factor_multicollin.pdf", width = 4, height = 4.5)
 corrplot::corrplot(
 	corr = cor.val1, 
 	p.mat = cor.pval1, 
@@ -372,7 +379,7 @@ df.forcor <- df %>%
     pivot_wider(names_from = taxa, values_from = abu) %>% 
     left_join(df.forcor, ., by = c("D", "H")) %>% 
     left_join(factors, by = c("D", "H")) %>% 
-	select(-wind_2m, -temp_2m, -hum_rel, -log_lux)
+	select(-wind_2m, -temp_2m, -hum_abs, -log_lux)
 
 cor.val2 <- cor(df.forcor[,12:15], df.forcor[,3:11], 
 	method = "spearman")
@@ -392,7 +399,11 @@ cor.pval2 <- expand_grid(v1 = 12:15, v2 = 3:11) %>%
 	column_to_rownames("v1") %>% 
 	as.matrix()
 
-pdf("Fig. F. Orders_and_factors.pdf", height = 4)
+rownames(cor.val2) <- 
+    rownames(cor.pval2) <- 
+    c("light level", "wind_20cm", "temperature_0cm", "humidity_relative")
+
+pdf("Fig. 8. Orders_and_factors.pdf", height = 4)
 corrplot::corrplot(
 	corr = cbind(cbind(All = cor.val2[,1]), 
 	             rep(NA, nrow(cor.val2)), 
