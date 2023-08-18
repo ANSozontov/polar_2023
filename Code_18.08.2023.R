@@ -65,8 +65,7 @@ df <- readxl::read_excel("Data_28.04.2023.xlsx",
 	mutate_at(c("trap_id", "D", "H", "abu"), as.numeric)
 
 # Environmental variables graph -------------------------------------------
-library(ggh4x) # dendrograms as well
-
+#library(ggh4x) # dendrograms as well
 for_pic <- loggers_raw %>% 
     mutate(D = as.numeric(substr(D, 1,2))) %>% 
     left_join(select(factors, D, H, lux), by = c("D", "H")) %>% 
@@ -290,7 +289,7 @@ ggsave("Fig.5 Orders_raw.pdf", width = 7, height = 4.5)
 # Red line marks middays, blue line marks midnights. 
 # Note: all raw variables data were normalized to max=1
 
-# dominant species  -------------------------------------------------------
+# H#1 by dominant species  -------------------------------------------------------
 dom_sp <- df %>%
 	filter(taxa %in% c("Masikia indistincta",
 		"Brachystomella parvula (Schäffer, 1896)", 
