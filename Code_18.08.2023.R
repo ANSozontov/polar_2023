@@ -492,3 +492,8 @@ dev.off()
 # The significance level (α) = 0.05. 
 # Statistically non-significant correlations are crossed out
 
+lst(cor1 = cor.val1, cor.pval1, cor2 = cor.val2, cor.pval2) %>% 
+    map(~.x %>% 
+        as.data.frame %>% 
+        rownames_to_column(" ")) %>% 
+    writexl::write_xlsx("correlations.xlsx")
