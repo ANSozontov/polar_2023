@@ -76,7 +76,7 @@ for_pic <- loggers_raw %>%
            .after = H) %>% 
     select(D, H, H2, cell1, 
            `1. Light level, klx` = lux,
-           `2. Temperature, °C` = temp_2m, 
+           `2. Temperature, °C` = temp_0cm, 
            `3. Humidity, %` = hum_rel
     )
 
@@ -87,28 +87,53 @@ a <- max(for_pic$`2. Temperature, °C`) / max(for_pic$`3. Humidity, %_2`)
 for_pic <- for_pic %>% 
     mutate(`3. Humidity, %_3` = `3. Humidity, %_2`*a)
 
-p_down <- for_pic %>% 
+(p2_down <- for_pic %>% 
     ggplot(aes(x = H2)) + 
-    geom_line(aes(y = `2. Temperature, °C`), color = "red") + 
-    geom_point(aes(y = `2. Temperature, °C`), color = "red", size = 0.5) +
-    geom_line(aes(y = `3. Humidity, %_3`), color = "blue") +
-    geom_point(aes(y = `3. Humidity, %_3`), color = "blue", size = 0.5) +
+        # 
+    geom_vline(xintercept = seq(12, 48, by = 24), color = "red", 
+               linetype = "dotted", alpha = 0.5) +
+    geom_vline(xintercept = seq(0, 48, by = 24), color = "blue", 
+               linetype = "dotted", alpha = 0.5) +
+        #
+    geom_line(aes(y = `2. Temperature, °C`), color = "#F8766D") + 
+    geom_point(aes(y = `2. Temperature, °C`), color = "#F8766D", size = 1) +
+    geom_line(aes(y = `3. Humidity, %_3`), color = "#4371C4") +
+    geom_point(aes(y = `3. Humidity, %_3`), color = "#4371C4", size = 1) +
     scale_y_continuous(
         sec.axis = sec_axis(trans=~./a+b, name="3. Humidity, %")) +
     facet_wrap(~cell1) + 
-    labs(x = NULL)
-
-p_top <- for_pic %>% 
+        #
+    theme_classic() +
+    theme(panel.grid.minor = element_blank(), 
+          panel.grid.major = element_blank()) + 
+    scale_x_continuous(breaks = seq(0, 48, by = 4), 
+                       labels = c(rep(seq(0, 20, by = 4), 2), 0)) + 
+        #
+    labs(x = NULL))
+ggsave("Fig.2 Environmental variables, down section_raw.pdf", 
+       plot = p2_down, width = 7.305, height = 2.5)
+(p2_top <- for_pic %>% 
     filter(`1. Light level, klx` > 0) %>% 
     ggplot(aes(H2, `1. Light level, klx`)) + 
-    geom_line(color = "yellow") + 
-    geom_point(color = "yellow") + 
+    geom_vline(xintercept = seq(12, 48, by = 24), color = "red", 
+                   linetype = "dotted", alpha = 0.5) +
+    geom_vline(xintercept = seq(0, 48, by = 24), color = "blue", 
+                   linetype = "dotted", alpha = 0.5) +
+    geom_line(color = "#FFBF00") + 
+    geom_point(color = "#FFBF00", size = 1) + 
     facet_wrap(~cell1) + 
     scale_y_log10() +
-    labs(x = NULL)
+    theme_classic() +
+    theme(panel.grid.minor = element_blank(), 
+              panel.grid.major = element_blank()) + 
+    scale_x_continuous(breaks = seq(0, 48, by = 4), 
+                           labels = c(rep(seq(0, 20, by = 4), 2), 0)) + 
+    labs(x = NULL))
+ggsave("Fig.2 Environmental variables, top section_raw.pdf", 
+       plot = p2_top, width = 7, height = 2.5)
 
-p2 <- gridExtra::grid.arrange(p_top, p_down, ncol = 1)
-ggsave("Fig.2 Environmental variables.pdf", plot = p2, width = 7, height = 4.5)
+# p2 <- gridExtra::grid.arrange(p2_top, p2_down, ncol = 1)
+# ggsave("Fig.2 Environmental variables_raw.pdf", plot = p2, width = 7, height = 4.5)
 
 # H1: is total activity periodic? -------------------------------------------------------
 abu <- df %>% 
@@ -466,3 +491,4 @@ dev.off()
 # The Spearman coefficient value is shown on the scale on the right. 
 # The significance level (α) = 0.05. 
 # Statistically non-significant correlations are crossed out
+
