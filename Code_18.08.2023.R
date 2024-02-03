@@ -279,7 +279,7 @@ by_taxa %>%
 		per2(a, 1/6)
 	})
 
-by_taxa %>% 
+df_by.taxa <- by_taxa %>% 
     lapply(function(a){
 		cbind(
 		    x = a$x, trend = a$trend, 
@@ -292,23 +292,45 @@ by_taxa %>%
 	rename(observed = x, periodic = seasonal) %>% 
 	pivot_longer(names_to = "component", values_to = "val", -1:-2) %>% 
 	mutate(component = factor(component,
-		levels = c("observed","trend", "periodic", "random"))) %>% 
-	ggplot(aes(x = id, y = val, color = taxa)) +
+		levels = c("observed","trend", "periodic", "random")))
+
+df_by.taxa %>% 
+    filter(component == "periodic") %>% 
+    ggplot(aes(x = id, y = val, color = taxa)) +
 	geom_vline(xintercept = (1:4)*6-3, color = "red", linetype = "dotted") +
 	geom_vline(xintercept = (1:4)*6, color = "blue", linetype = "dotted") +
 	geom_line() + 
 	geom_point(shape = 21, fill = "white") +
 	theme_bw() +
-	facet_grid(rows = vars(component), scales = "free") + 
+	facet_grid(rows = vars(taxa), scales = "fixed") + 
 	scale_x_continuous(breaks = 1:24, labels = rep(1:6*4, 4)) + 
 	theme(axis.text.x = element_text(angle = 0), 
 		 panel.grid.minor = element_blank(), 
 		 panel.grid.minor.y = element_blank(), 
 		 panel.grid.major.x = element_blank(), 
-		 legend.position = "bottom") +
+		 legend.position = "none") +
 	labs(x = "Sampling hours", y = "Abundance/activity and its components", 
 		subtitle = "all variables are normalized to max = 1")
 ggsave("Fig.5 Orders_raw.pdf", width = 7, height = 4.5)
+
+df_by.taxa %>% 
+    ggplot(aes(x = id, y = val, color = taxa)) +
+    geom_vline(xintercept = (1:4)*6-3, color = "red", linetype = "dotted") +
+    geom_vline(xintercept = (1:4)*6, color = "blue", linetype = "dotted") +
+    geom_line() + 
+    geom_point(shape = 21, fill = "white") +
+    theme_bw() +
+    facet_grid(rows = vars(component), scales = "free") + 
+    scale_x_continuous(breaks = 1:24, labels = rep(1:6*4, 4)) + 
+    theme(axis.text.x = element_text(angle = 0), 
+          panel.grid.minor = element_blank(), 
+          panel.grid.minor.y = element_blank(), 
+          panel.grid.major.x = element_blank(), 
+          legend.position = "bottom") +
+    labs(x = "Sampling hours", y = "Abundance/activity and its components", 
+         subtitle = "all variables are normalized to max = 1")
+ggsave("Fig.5_full (for suppl) Orders_raw.pdf", width = 7, height = 4.5)
+
 # Time series of diurnal arthropods activity (by orders) 
 # and its components (trend, periodicity, residuals). 
 # Red line marks middays, blue line marks midnights. 
@@ -340,7 +362,7 @@ dom_sp %>%
 		per2(a, 1/6)
 	})
 
-dom_sp %>% 
+df_dom_sp <- dom_sp %>% 
     lapply(function(a){
         cbind(x = a$x, trend = a$trend, 
               seasonal = a$seasonal, random = a$random) %>% 
@@ -355,7 +377,29 @@ dom_sp %>%
     rename(observed = x, periodic = seasonal) %>% 
     pivot_longer(names_to = "component", values_to = "val", -1:-2) %>% 
     mutate(component = factor(component,
-                              levels = c("observed","trend", "periodic", "random"))) %>% 
+                              levels = c("observed","trend", "periodic", "random")))
+
+df_dom_sp %>% 
+    filter(component == "periodic") %>% 
+    ggplot(aes(x = id, y = val, color = taxa)) +
+    geom_vline(xintercept = (1:4)*6-3, color = "red", linetype = "dotted") +
+    geom_vline(xintercept = (1:4)*6, color = "blue", linetype = "dotted") +
+    geom_line() + 
+    geom_point(shape = 21, fill = "white") +
+    theme_bw() +
+    facet_grid(rows = vars(taxa), scales = "fixed") + 
+    scale_x_continuous(breaks = 1:24, labels = rep(1:6*4, 4)) + 
+    theme(axis.text.x = element_text(angle = 0), 
+          panel.grid.minor = element_blank(), 
+          panel.grid.minor.y = element_blank(), 
+          panel.grid.major.x = element_blank(), 
+          legend.text = element_text(face = "italic"),
+          legend.position = "bottom") +
+    labs(x = "Sampling hours", y = "Abundance/activity and its components", 
+         subtitle = "Note: all variables are normalized to max=1")
+ggsave("Fig.6 Dominant species_raw.pdf", width = 7, height = 4.5)
+
+df_dom_sp %>% 
     ggplot(aes(x = id, y = val, color = taxa)) +
     geom_vline(xintercept = (1:4)*6-3, color = "red", linetype = "dotted") +
     geom_vline(xintercept = (1:4)*6, color = "blue", linetype = "dotted") +
@@ -372,7 +416,7 @@ dom_sp %>%
           legend.position = "bottom") +
     labs(x = "Sampling hours", y = "Abundance/activity and its components", 
          subtitle = "Note: all variables are normalized to max=1")
-ggsave("Fig.6 Dominant species_raw.pdf", width = 7, height = 4.5)
+ggsave("Fig.6_full (for suppl) Dominant species_raw.pdf", width = 7, height = 4.5)
 # Time series of arthropods dominant species 
 # and its components (trend, periodicity, residuals). 
 # Red line marks middays, blue line marks midnights. 
@@ -466,7 +510,7 @@ rownames(cor.val2) <-
     rownames(cor.pval2) <- 
     c("light level", "wind_20cm", "temperature_0cm", "humidity_relative")
 
-pdf("Fig.8. Orders and factors_raw.pdf", height = 4)
+pdf("Fig.8_raw. Orders and factors_raw.pdf", height = 4)
 corrplot::corrplot(
 	corr = cbind(cbind(All = cor.val2[,1]), 
 	             rep(NA, nrow(cor.val2)), 
@@ -497,3 +541,34 @@ lst(cor1 = cor.val1, cor.pval1, cor2 = cor.val2, cor.pval2) %>%
         as.data.frame %>% 
         rownames_to_column(" ")) %>% 
     writexl::write_xlsx("correlations.xlsx")
+
+# scatterplots ------------------------------------------------------------
+df.forcor %>% 
+    select(-`B. parvula`:-`P. crassicauda`) %>% 
+    pivot_longer(names_to = "taxa", values_to = "y", -c("D", "H", "lux", "wind_20cm", "temp_0cm", "hum_rel")) %>%
+    mutate(taxa = factor(taxa, ordered = TRUE, levels = colnames(df.forcor)[3:11])) %>% 
+    pivot_longer(names_to = "variable", values_to = "x", -c("D", "H", "taxa", "y")) %>% 
+    mutate(
+        variable = factor(variable, ordered = TRUE, levels = colnames(df.forcor)[12:15]),
+        x = case_when(variable == "lux" ~ log10(x), TRUE ~ x)) %>% 
+    ggplot(aes(x, y)) + 
+    geom_point() + 
+    facet_grid(cols = vars(variable), rows = vars(taxa), scales = "free") + 
+    labs(x = "Factor values", y = "Abundance/activity")
+ggsave("Fig.9A Scatterplots - All taxa & orders.pdf", width = 10, height = 10)
+
+df.forcor %>% 
+    select(-`All`:-`Diptera`) %>% 
+    pivot_longer(names_to = "taxa", values_to = "y", -c("D", "H", "lux", "wind_20cm", "temp_0cm", "hum_rel")) %>%
+    mutate(taxa = factor(taxa, ordered = TRUE, levels = colnames(df.forcor)[3:11])) %>% 
+    pivot_longer(names_to = "variable", values_to = "x", -c("D", "H", "taxa", "y")) %>% 
+    mutate(
+        variable = factor(variable, ordered = TRUE, levels = colnames(df.forcor)[12:15]),
+        x = case_when(variable == "lux" ~ log10(x), TRUE ~ x)) %>% 
+    ggplot(aes(x, y)) + 
+    geom_point() + 
+    facet_grid(cols = vars(variable), rows = vars(taxa), scales = "free") + 
+    labs(x = "Factor values", y = "Abundance/activity")
+ggsave("Fig.9B Scatterplots - Dominant species.pdf", width = 10, height = 9)
+
+
