@@ -156,6 +156,7 @@ abu[c("x", "seasonal", "trend", "random")] %>%
 	mutate(component = factor(component,
 						 levels = c("observed","trend", "periodic", "random"))) %>% 
 	ggplot(aes(x = id, y = val)) +
+    geom_vline(xintercept = 12.5, linewidth = 1.5, color = "grey") +
 	geom_vline(xintercept = (1:4)*6-3, color = "red", linetype = "dotted") +
 	geom_vline(xintercept = (1:4)*6, color = "blue", linetype = "dotted") +
 	geom_line() + 
@@ -297,6 +298,7 @@ df_by.taxa <- by_taxa %>%
 df_by.taxa %>% 
     filter(component == "periodic") %>% 
     ggplot(aes(x = id, y = val, color = taxa)) +
+    geom_vline(xintercept = 12.5, linewidth = 1.5, color = "grey") +
 	geom_vline(xintercept = (1:4)*6-3, color = "red", linetype = "dotted") +
 	geom_vline(xintercept = (1:4)*6, color = "blue", linetype = "dotted") +
 	geom_line() + 
@@ -315,6 +317,7 @@ ggsave("Fig.5 Orders_raw.pdf", width = 7, height = 4.5)
 
 df_by.taxa %>% 
     ggplot(aes(x = id, y = val, color = taxa)) +
+    geom_vline(xintercept = 12.5, linewidth = 1.5, color = "grey") +
     geom_vline(xintercept = (1:4)*6-3, color = "red", linetype = "dotted") +
     geom_vline(xintercept = (1:4)*6, color = "blue", linetype = "dotted") +
     geom_line() + 
@@ -379,9 +382,21 @@ df_dom_sp <- dom_sp %>%
     mutate(component = factor(component,
                               levels = c("observed","trend", "periodic", "random")))
 
+# df_dom_sp %>% 
+#     mutate(taxa = )
 df_dom_sp %>% 
+    pull(taxa) %>% 
+    sapply(function(a){
+        paste0(
+            substr(str_split_1(a, " ")[[1]], 1, 1), 
+            ". ", 
+            str_split_1(a, " ")[[2]]
+        )
+    }) %>% 
+    mutate(df_dom_sp, taxa = .) %>% 
     filter(component == "periodic") %>% 
     ggplot(aes(x = id, y = val, color = taxa)) +
+    geom_vline(xintercept = 12.5, linewidth = 1.5, color = "grey") +
     geom_vline(xintercept = (1:4)*6-3, color = "red", linetype = "dotted") +
     geom_vline(xintercept = (1:4)*6, color = "blue", linetype = "dotted") +
     geom_line() + 
@@ -394,7 +409,10 @@ df_dom_sp %>%
           panel.grid.minor.y = element_blank(), 
           panel.grid.major.x = element_blank(), 
           legend.text = element_text(face = "italic"),
-          legend.position = "bottom") +
+          legend.position = "bottom", 
+          strip.text.y = element_text(
+              size = 7, face = "italic")
+          ) +
     labs(x = "Sampling hours", y = "Abundance/activity and its components", 
          subtitle = "Note: all variables are normalized to max=1")
 ggsave("Fig.6 Dominant species_raw.pdf", width = 7, height = 4.5)
@@ -551,6 +569,12 @@ df.forcor %>%
     mutate(
         variable = factor(variable, ordered = TRUE, levels = colnames(df.forcor)[12:15]),
         x = case_when(variable == "lux" ~ log10(x), TRUE ~ x)) %>% 
+    mutate(variable = fct_recode(variable, 
+                                 light = "lux", 
+                                 wind = "wind_20cm",
+                                 temperature = "temp_0cm",
+                                 humidity = "hum_rel"
+                                 )) %>% 
     ggplot(aes(x, y)) + 
     geom_point() + 
     facet_grid(cols = vars(variable), rows = vars(taxa), scales = "free") + 
@@ -565,10 +589,19 @@ df.forcor %>%
     mutate(
         variable = factor(variable, ordered = TRUE, levels = colnames(df.forcor)[12:15]),
         x = case_when(variable == "lux" ~ log10(x), TRUE ~ x)) %>% 
+    mutate(variable = fct_recode(variable, 
+                                 light = "lux", 
+                                 wind = "wind_20cm",
+                                 temperature = "temp_0cm",
+                                 humidity = "hum_rel"
+    )) %>% 
     ggplot(aes(x, y)) + 
     geom_point() + 
     facet_grid(cols = vars(variable), rows = vars(taxa), scales = "free") + 
-    labs(x = "Factor values", y = "Abundance/activity")
+    labs(x = "Factor values", y = "Abundance/activity") + 
+    theme(strip.text.y = element_text(
+        # size = 7, 
+        face = "italic"))
 ggsave("Fig.9B Scatterplots - Dominant species.pdf", width = 10, height = 9)
 
 
