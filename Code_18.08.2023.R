@@ -53,7 +53,7 @@ factors <- readxl::read_excel("Data_28.04.2023.xlsx",
 		sheet = "factors", range = "A2:E26") |>
 	mutate(D = substr(str_squish(D), 1, 2), 
 		  D = as.numeric(D), 
-		  log_lux = log10(lux), .after = 2)
+		  log_lux = log10(klux), .after = 2)
 factors <- left_join(factors, loggers, by = c("D", "H")) 
 
 df <- readxl::read_excel("Data_28.04.2023.xlsx", 
@@ -68,14 +68,14 @@ df <- readxl::read_excel("Data_28.04.2023.xlsx",
 #library(ggh4x) # dendrograms as well
 for_pic <- loggers_raw %>% 
     mutate(D = as.numeric(substr(D, 1,2))) %>% 
-    left_join(select(factors, D, H, lux), by = c("D", "H")) %>% 
+    left_join(select(factors, D, H, klux), by = c("D", "H")) %>% 
     mutate(H2 = case_when(D == 7 | D == 16 ~ H, 
                           D == 8 | D == 17 ~ H+24, 
                           TRUE ~ H+48), 
            cell1 = case_when(D < 15 ~ "07-08.08", TRUE ~ "16-17.08"),
            .after = H) %>% 
     select(D, H, H2, cell1, 
-           `1. Light level, klx` = lux,
+           `1. Light level, klx` = klux,
            `2. Temperature, °C` = temp_0cm, 
            `3. Humidity, %` = hum_rel
     )
@@ -122,7 +122,7 @@ ggsave("Fig.2 Environmental variables, down section_raw.pdf",
     geom_line(color = "#FFBF00") + 
     geom_point(color = "#FFBF00", size = 1) + 
     facet_wrap(~cell1) + 
-    scale_y_log10() +
+    # scale_y_log10() +
     theme_classic() +
     theme(panel.grid.minor = element_blank(), 
               panel.grid.major = element_blank()) + 
@@ -164,7 +164,9 @@ abu[c("x", "seasonal", "trend", "random")] %>%
 	facet_grid(rows = vars(component)) + #, scales = "free") + 
 	scale_x_continuous(breaks = 1:24, 
 		labels = rep(1:6*4, 4)) + 
-	theme(axis.text.x = element_text(angle = 0), 
+	theme(
+	     strip.text.y = element_text(angle = 90),
+	     axis.text.x = element_text(angle = 0), 
 		 panel.grid.minor = element_blank(), 
 		 panel.grid.minor.y = element_blank(), 
 		 panel.grid.major.x = element_blank()) +
@@ -189,6 +191,7 @@ for_boxplots <- df %>%
     filter(taxa %in%  c("All_taxa", "Collembola", "Aranei", "Acari", "Diptera", 
         "Masikia indistincta","Brachystomella parvula (Schäffer, 1896)", 
         "Isotomurus chaos Potapov et Babenko, 2011", 
+        # "Isotomurus stuxbergi (Tullberg, 1876)", #############################
         "Pachyotoma crassicauda (Tullberg, 1871)")) %>% 
     separate(taxa, c("gen", "sp"), " ", extra = "drop") %>%
     mutate(taxa = case_when(is.na(sp) ~ gen, TRUE ~ paste0(gen, " ", sp)),
@@ -241,6 +244,7 @@ for_boxplots %>%
     filter(taxa %in% c("Masikia indistincta",
                        "Brachystomella parvula", 
                        "Isotomurus chaos",
+                       # "Isotomurus stuxbergi", ###############################
                        "Pachyotoma crassicauda")) %>% 
     group_by(taxa, H, H2) %>% 
     mutate(mean_abu = mean(abu)) %>% 
@@ -306,7 +310,9 @@ df_by.taxa %>%
 	theme_bw() +
 	facet_grid(rows = vars(taxa), scales = "fixed") + 
 	scale_x_continuous(breaks = 1:24, labels = rep(1:6*4, 4)) + 
-	theme(axis.text.x = element_text(angle = 0), 
+	theme(
+	     strip.text.y = element_text(angle = 90),
+	     axis.text.x = element_text(angle = 0), 
 		 panel.grid.minor = element_blank(), 
 		 panel.grid.minor.y = element_blank(), 
 		 panel.grid.major.x = element_blank(), 
@@ -325,7 +331,9 @@ df_by.taxa %>%
     theme_bw() +
     facet_grid(rows = vars(component), scales = "free") + 
     scale_x_continuous(breaks = 1:24, labels = rep(1:6*4, 4)) + 
-    theme(axis.text.x = element_text(angle = 0), 
+    theme(
+          strip.text.y = element_text(angle = 90),
+          axis.text.x = element_text(angle = 0), 
           panel.grid.minor = element_blank(), 
           panel.grid.minor.y = element_blank(), 
           panel.grid.major.x = element_blank(), 
@@ -404,14 +412,16 @@ df_dom_sp %>%
     theme_bw() +
     facet_grid(rows = vars(taxa), scales = "fixed") + 
     scale_x_continuous(breaks = 1:24, labels = rep(1:6*4, 4)) + 
-    theme(axis.text.x = element_text(angle = 0), 
+    theme(
+          # strip.text.y = element_text(angle = 90),
+          axis.text.x = element_text(angle = 0), 
           panel.grid.minor = element_blank(), 
           panel.grid.minor.y = element_blank(), 
           panel.grid.major.x = element_blank(), 
           legend.text = element_text(face = "italic"),
           legend.position = "bottom", 
           strip.text.y = element_text(
-              size = 7, face = "italic")
+              size = 7, face = "italic", angle = 90)
           ) +
     labs(x = "Sampling hours", y = "Abundance/activity and its components", 
          subtitle = "Note: all variables are normalized to max=1")
@@ -528,26 +538,26 @@ rownames(cor.val2) <-
     rownames(cor.pval2) <- 
     c("light level", "wind_20cm", "temperature_0cm", "humidity_relative")
 
-pdf("Fig.8_raw. Orders and factors_raw.pdf", height = 4)
-corrplot::corrplot(
-	corr = cbind(cbind(All = cor.val2[,1]), 
-	             rep(NA, nrow(cor.val2)), 
-	             cor.val2[,2:5], 
-	             rep(NA, nrow(cor.val2)), 
-	             cor.val2[,6:9]),
-	p.mat = cbind(cbind(All = cor.pval2[,1]), 
-	              rep(NA, nrow(cor.val2)), 
-	              cor.pval2[,2:5], 
-	              rep(NA, nrow(cor.val2)), 
-	              cor.pval2[,6:9]), 
-	type="full", 
-	order = "original",
-	na.label = " ",
-	diag = TRUE,
-	is.corr=FALSE,
-	col =  corrplot::COL2('RdYlBu', 10)[10:1], 
-	sig.level = 0.05)
-dev.off()
+# pdf("Fig.8_raw. Orders and factors_raw.pdf", height = 4)
+# corrplot::corrplot(
+# 	corr = cbind(cbind(All = cor.val2[,1]), 
+# 	             rep(NA, nrow(cor.val2)), 
+# 	             cor.val2[,2:5], 
+# 	             rep(NA, nrow(cor.val2)), 
+# 	             cor.val2[,6:9]),
+# 	p.mat = cbind(cbind(All = cor.pval2[,1]), 
+# 	              rep(NA, nrow(cor.val2)), 
+# 	              cor.pval2[,2:5], 
+# 	              rep(NA, nrow(cor.val2)), 
+# 	              cor.pval2[,6:9]), 
+# 	type="full", 
+# 	order = "original",
+# 	na.label = " ",
+# 	diag = TRUE,
+# 	is.corr=FALSE,
+# 	col =  corrplot::COL2('RdYlBu', 10)[10:1], 
+# 	sig.level = 0.05)
+# dev.off()
 # Correlation of taxa’ activity (including dominant species) 
 # and measured factors by Spearman method. 
 # The Spearman coefficient value is shown on the scale on the right. 
@@ -563,14 +573,14 @@ lst(cor1 = cor.val1, cor.pval1, cor2 = cor.val2, cor.pval2) %>%
 # scatterplots ------------------------------------------------------------
 df.forcor %>% 
     select(-`B. parvula`:-`P. crassicauda`) %>% 
-    pivot_longer(names_to = "taxa", values_to = "y", -c("D", "H", "lux", "wind_20cm", "temp_0cm", "hum_rel")) %>%
+    pivot_longer(names_to = "taxa", values_to = "y", -c("D", "H", "klux", "wind_20cm", "temp_0cm", "hum_rel")) %>%
     mutate(taxa = factor(taxa, ordered = TRUE, levels = colnames(df.forcor)[3:11])) %>% 
     pivot_longer(names_to = "variable", values_to = "x", -c("D", "H", "taxa", "y")) %>% 
     mutate(
         variable = factor(variable, ordered = TRUE, levels = colnames(df.forcor)[12:15]),
         x = case_when(variable == "lux" ~ log10(x), TRUE ~ x)) %>% 
     mutate(variable = fct_recode(variable, 
-                                 light = "lux", 
+                                 light = "klux", 
                                  wind = "wind_20cm",
                                  temperature = "temp_0cm",
                                  humidity = "hum_rel"
@@ -578,19 +588,20 @@ df.forcor %>%
     ggplot(aes(x, y)) + 
     geom_point() + 
     facet_grid(cols = vars(variable), rows = vars(taxa), scales = "free") + 
-    labs(x = "Factor values", y = "Abundance/activity")
-ggsave("Fig.9A Scatterplots - All taxa & orders.pdf", width = 10, height = 10)
+    labs(x = "Factor values", y = "Abundance/activity") +
+    theme(strip.text.y = element_text(angle = 90))
+ggsave("Fig.8 Scatterplots - All taxa & orders.pdf", width = 10, height = 10)
 
 df.forcor %>% 
     select(-`All`:-`Diptera`) %>% 
-    pivot_longer(names_to = "taxa", values_to = "y", -c("D", "H", "lux", "wind_20cm", "temp_0cm", "hum_rel")) %>%
+    pivot_longer(names_to = "taxa", values_to = "y", -c("D", "H", "klux", "wind_20cm", "temp_0cm", "hum_rel")) %>%
     mutate(taxa = factor(taxa, ordered = TRUE, levels = colnames(df.forcor)[3:11])) %>% 
     pivot_longer(names_to = "variable", values_to = "x", -c("D", "H", "taxa", "y")) %>% 
     mutate(
         variable = factor(variable, ordered = TRUE, levels = colnames(df.forcor)[12:15]),
         x = case_when(variable == "lux" ~ log10(x), TRUE ~ x)) %>% 
     mutate(variable = fct_recode(variable, 
-                                 light = "lux", 
+                                 light = "klux", 
                                  wind = "wind_20cm",
                                  temperature = "temp_0cm",
                                  humidity = "hum_rel"
@@ -600,8 +611,8 @@ df.forcor %>%
     facet_grid(cols = vars(variable), rows = vars(taxa), scales = "free") + 
     labs(x = "Factor values", y = "Abundance/activity") + 
     theme(strip.text.y = element_text(
-        # size = 7, 
+        angle = 90,
         face = "italic"))
-ggsave("Fig.9B Scatterplots - Dominant species.pdf", width = 10, height = 9)
+ggsave("Fig.9 Scatterplots - Dominant species.pdf", width = 10, height = 9)
 
 
