@@ -194,7 +194,7 @@ for_boxplots <- df %>%
     filter(taxa %in%  c("All_taxa", "Collembola", "Aranei", "Acari", "Diptera", 
         "Masikia indistincta","Brachystomella parvula (Schäffer, 1896)", 
         "Isotomurus chaos Potapov et Babenko, 2011", 
-        # "Isotomurus stuxbergi (Tullberg, 1876)", #############################
+        # "Isotomurus stuxbergi (Tullberg, 1876)", 
         "Pachyotoma crassicauda (Tullberg, 1871)")) %>% 
     separate(taxa, c("gen", "sp"), " ", extra = "drop") %>%
     mutate(taxa = case_when(is.na(sp) ~ gen, TRUE ~ paste0(gen, " ", sp)),
@@ -247,7 +247,7 @@ for_boxplots %>%
     filter(taxa %in% c("Masikia indistincta",
                        "Brachystomella parvula", 
                        "Isotomurus chaos",
-                       # "Isotomurus stuxbergi", ###############################
+                       # "Isotomurus stuxbergi", #
                        "Pachyotoma crassicauda")) %>% 
     group_by(taxa, H, H2) %>% 
     mutate(mean_abu = mean(abu)) %>% 
@@ -320,7 +320,7 @@ df_by.taxa %>%
 		 panel.grid.minor.y = element_blank(), 
 		 panel.grid.major.x = element_blank(), 
 		 legend.position = "none") +
-	labs(x = "Sampling hours", y = "Abundance/activity and its components", 
+	labs(x = "Sampling hours", y = "Abundance/activity (periodic component)", 
 		subtitle = "all variables are normalized to max = 1")
 ggsave("Fig.5 Orders_raw.pdf", width = 7, height = 4.5)
 
@@ -426,7 +426,7 @@ df_dom_sp %>%
           strip.text.y = element_text(
               size = 7, face = "italic", angle = 90)
           ) +
-    labs(x = "Sampling hours", y = "Abundance/activity and its components", 
+    labs(x = "Sampling hours", y = "Abundance/activity (periodic component)", 
          subtitle = "Note: all variables are normalized to max=1")
 ggsave("Fig.6 Dominant species_raw.pdf", width = 7, height = 4.5)
 
