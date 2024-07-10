@@ -1,5 +1,8 @@
 library(tidyverse)
-theme_set(theme_bw() + theme(legend.position = "bottom"))
+theme_set(
+    theme_bw() + 
+    theme(legend.position = "bottom")
+    )
 
 # custom functions --------------------------------------------------------
 per2 <- function(data, periodicity_freq){
