@@ -1,6 +1,6 @@
 # Diurnal activity of terrestrial arthropods in the high arctic
 
-Source code of data processing for the artice: Nekhaeva A.A., Babenko A.B., Bizin M.S., Sozontov A.N. Diurnal Activity of Terrestrial Arthropods in the High Arctic // Polar biology. 2024. Vol. 47. № 8. P. ... under the [Creative Commons Attribution-ShareAlike 4.0 International License][cc-by-sa]. DOI: https://doi.org/10.1007/s00300-024-03278-1
+Source code of data processing for the artice: Nekhaeva A.A., Babenko A.B., Bizin M.S., Sozontov A.N. Diurnal Activity of Terrestrial Arthropods in the High Arctic // Polar biology. 2024. Vol. 47. № 8. P. 1077–1092. under the [Creative Commons Attribution-ShareAlike 4.0 International License][cc-by-sa]. DOI: https://doi.org/10.1007/s00300-024-03278-1
 
 You are free to use, transform and distribute this code or its parts, including commercial purposes. Just keep in mind only two restrictions: (1) `BY`: You are obligated to cite the article where authorship was claimed (see above); (2): `SA`: You are obligated to publish and distribute you derivate code under the license not stricter than the current one (CC-BY-SA)
 
