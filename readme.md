@@ -1,4 +1,4 @@
-Source code of data processing for the artice
+Code & data for the artice
 # Diurnal activity of terrestrial arthropods in the high arctic
 
 [Nekhaeva A.A.](https://sev-in.ru/user/429), [Babenko A.B.](https://sev-in.ru/user/439), [Bizin M.S.](https://sev-in.ru/user/498), [Sozontov A.N.](https://ipae.uran.ru/Sozontov_AN)
