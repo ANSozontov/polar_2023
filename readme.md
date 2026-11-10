@@ -1,7 +1,8 @@
 Code & data for the artice
-# Diurnal activity of terrestrial arthropods in the high arctic
 
 [Nekhaeva A.A.](https://sev-in.ru/user/429), [Babenko A.B.](https://sev-in.ru/user/439), [Bizin M.S.](https://sev-in.ru/user/498), [Sozontov A.N.](https://ipae.uran.ru/Sozontov_AN)
+
+# Diurnal activity of terrestrial arthropods in the high arctic
 
 // Polar biology. 2024. Vol. 47. № 8. P. 1077–1092. DOI: [10.1007/s00300-024-03278-1](https://doi.org/10.1007/s00300-024-03278-1)
 
